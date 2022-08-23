@@ -44,8 +44,8 @@ export class SinglyLinkedList {
     return this;
   }
 
-  getNodeAt(index: number) {
-    if (index > this.listLength - 1) {
+  get(index: number) {
+    if (index >= this.listLength || index < 0) {
       return undefined;
     } else {
       let node = this.head!;
@@ -54,6 +54,49 @@ export class SinglyLinkedList {
       }
       return node;
     }
+  }
+
+  set(index: number, value: any) {
+    const node = this.get(index);
+    if (!node) return undefined;
+
+    node.value = value;
+    return node;
+  }
+
+  insert(index: number, value: any) {
+    if (index < 0 || index > this.listLength) return undefined;
+
+    if (index === this.listLength) {
+      return this.push(value);
+    } else if (index === 0) {
+      return this.unshift(value);
+    }
+
+    const newNode = new ListNode(value);
+    const prevNode = this.get(index - 1)!;
+    newNode.next = prevNode.next;
+    prevNode.next = newNode;
+    this.listLength++;
+
+    return this;
+  }
+
+  remove(index: number) {
+    if (index < 0 || index >= this.listLength) return undefined;
+
+    if (index === 0) {
+      return this.shift();
+    } else if (index === this.listLength - 1) {
+      return this.pop();
+    }
+
+    const prevNode = this.get(index - 1)!;
+    const node = prevNode!.next!;
+    prevNode.next = node.next;
+    node.next = undefined;
+    this.listLength--;
+    return node;
   }
 
   pop(): ListNode | undefined {
@@ -65,7 +108,7 @@ export class SinglyLinkedList {
       this.head = undefined;
       this.tail = undefined;
     } else {
-      const secondLastNode = this.getNodeAt(this.listLength - 2);
+      const secondLastNode = this.get(this.listLength - 2);
       secondLastNode!.next = undefined;
 
       nodeToRemove = this.tail!;
@@ -94,7 +137,46 @@ export class SinglyLinkedList {
     const nodeToAdd = new ListNode(value);
     nodeToAdd.next = this.head;
     this.head = nodeToAdd;
+
     this.listLength++;
+
+    if (this.listLength === 1) {
+      this.tail = nodeToAdd;
+    }
+
     return this;
+  }
+
+  reverse() {
+    const oldHeadNode = this.head;
+    this.head = this.tail;
+    this.tail = oldHeadNode;
+
+    let prevNode = undefined;
+    let currentNode = oldHeadNode;
+    let nextNode;
+
+    while (currentNode) {
+      nextNode = currentNode.next;
+      currentNode.next = prevNode;
+      prevNode = currentNode;
+      currentNode = nextNode;
+    }
+
+    return this;
+  }
+
+  forEach(callback: (value: any) => void) {
+    let currentNode = this.head;
+    while (currentNode) {
+      callback(currentNode.value);
+      currentNode = currentNode.next;
+    }
+  }
+
+  toArray() {
+    const arr: any[] = [];
+    this.forEach((val) => arr.push(val));
+    return arr;
   }
 }
